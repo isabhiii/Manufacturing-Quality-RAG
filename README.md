@@ -2,10 +2,7 @@
 
 A production oriented RAG system designed to reduce information retrieval time in manufacturing environments. This application allows engineers to upload technical documentation (SOPs, ISO standards, test procedures) and retrieve precise, cited answers via a natural language interface.
 
-## Demo
-
-
-
+### Demo video file included: https://github.com/isabhiii/manufacturing-quality-rag/blob/main/RAG%20project%20demo.MP4
 
 ## Architecture
 
