@@ -1,0 +1,19 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+env/
+venv/
+.env
+
+# Docker
+.docker/
+
+# Data (Don't commit local vector db or uploaded docs)
+data/docs/
+data/index/
+
+# OS
+.DS_Store

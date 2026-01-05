@@ -1,0 +1,27 @@
+services:
+  backend:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile.backend
+    ports:
+      - "8000:8000"
+    volumes:
+      - ../data:/data
+    environment:
+      - GOOGLE_API_KEY=${GOOGLE_API_KEY}
+      - DOCS_DIR=/data/docs
+      - INDEX_DIR=/data/index
+
+  frontend:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile.frontend
+    ports:
+      - "8501:8501"
+    environment:
+      - DEFAULT_API_URL=http://backend:8000/api
+    depends_on:
+      - backend
+
+volumes:
+  data:
