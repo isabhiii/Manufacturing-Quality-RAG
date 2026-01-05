@@ -17,8 +17,8 @@ class Settings(BaseSettings):
     VECTOR_DB_K: int = 5
     
     # LLM Settings
-    GOOGLE_API_KEY: str # Read from env variable
-    LLM_MODEL: str = "gemini-2.5-flash" # Latest Flash model
+    GOOGLE_API_KEY: str = "" # Set via .env file
+    LLM_MODEL: str = "gemini-2.0-flash" # Latest Flash model
     
     class Config:
         env_file = ".env"

@@ -16,18 +16,21 @@ class RAGPipeline:
             content = doc.page_content.replace("\n", " ")
             context_text += f"[{i+1}] Source: {source}, Page: {page}\nContent: {content}\n\n"
 
-        prompt = f"""
-You are a Manufacturing Quality Assistant. Use the following context documents to answer the user's question.
-If the answer is not found in the documents, state that you do not know based on the provided context.
-Cite the documents by their source name and page number when answering.
+        prompt = f"""You are a Manufacturing Quality Assistant. Answer the user's question based ONLY on the provided context documents.
+
+Rules:
+- If the answer is not in the documents, say "I don't have information about this in the provided documents."
+- DO NOT add citation numbers or references like [1], [2], or (Source: ...) in your answer.
+- DO NOT use markdown formatting like asterisks (*) or bullet points. Write in plain prose.
+- Write a clear, direct answer in flowing paragraphs.
+- Be concise but thorough.
 
 Context:
 {context_text}
 
 Question: {query}
 
-Answer:
-"""
+Answer:"""
         return prompt
 
     def run(self, query: str):

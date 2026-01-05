@@ -29,6 +29,9 @@ def load_documents(source_dir: str) -> List[Document]:
                 # Add source metadata just in case
                 for doc in docs:
                    doc.metadata["source"] = filename
+                   # Fix 0-based indexing to 1-based for humans
+                   current_page = doc.metadata.get("page", 0)
+                   doc.metadata["page"] = current_page + 1
                 documents.extend(docs)
                 logger.info(f"Loaded {len(docs)} pages from {filename}")
             except Exception as e:

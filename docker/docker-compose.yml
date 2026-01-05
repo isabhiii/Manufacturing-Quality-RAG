@@ -8,7 +8,7 @@ services:
     volumes:
       - ../data:/data
     environment:
-      - GOOGLE_API_KEY=${GOOGLE_API_KEY}
+      - GOOGLE_API_KEY=AIzaSyB_tenbpC9mpdE_2qmUpCiZpLa6SYQ1HbU
       - DOCS_DIR=/data/docs
       - INDEX_DIR=/data/index
 
