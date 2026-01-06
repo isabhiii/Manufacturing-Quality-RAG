@@ -46,7 +46,8 @@ html, body, [data-testid="stAppViewContainer"], .stMarkdown, p, button, input {
     border-right: 2px solid #000000;
 }
 
-#MainMenu, footer, header { visibility: hidden; }
+#MainMenu, footer { visibility: hidden; }
+header { background: transparent !important; }
 
 /* --- Industrial Header --- */
 .hero { text-align: left; margin-bottom: 3rem; position: relative; }
