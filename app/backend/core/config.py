@@ -18,7 +18,7 @@ class Settings(BaseSettings):
     
     # LLM Settings
     GOOGLE_API_KEY: str = "AIzaSyDu-YOROl8CWcRT7Fm9bLZv5Z2YXrygcAw"
-    LLM_MODEL: str = "gemini-2.0-flash" 
+    LLM_MODEL: str = "gemini-2.5-flash" 
     
     class Config:
         env_file = ".env"
