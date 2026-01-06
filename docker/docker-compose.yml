@@ -9,7 +9,7 @@ services:
       - ../data:/data
       - ../data/cache:/root/.cache/huggingface
     environment:
-      - GOOGLE_API_KEY=AIzaSyDu-YOROl8CWcRT7Fm9bLZv5Z2YXrygcAw
+      - GOOGLE_API_KEY=${GOOGLE_API_KEY}
       - DOCS_DIR=/data/docs
       - INDEX_DIR=/data/index
     healthcheck:

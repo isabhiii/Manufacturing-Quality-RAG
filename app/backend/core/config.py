@@ -17,7 +17,7 @@ class Settings(BaseSettings):
     VECTOR_DB_K: int = 8
     
     # LLM Settings
-    GOOGLE_API_KEY: str = "AIzaSyDu-YOROl8CWcRT7Fm9bLZv5Z2YXrygcAw"
+    GOOGLE_API_KEY: str = ""  # Set via environment variable or .env file
     LLM_MODEL: str = "gemini-2.5-flash" 
     
     class Config:
