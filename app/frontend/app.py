@@ -167,7 +167,7 @@ if "api_url" not in st.session_state:
 # Sync indexed_files with backend on startup
 if "synced" not in st.session_state:
     try:
-        resp = requests.get(f"{st.session_state.api_url}/admin/files")
+        resp = requests.get(f"{st.session_state.api_url}/admin/files", timeout=2)
         if resp.status_code == 200:
             st.session_state.indexed_files = resp.json().get("files", [])
             st.session_state.synced = True
@@ -175,6 +175,12 @@ if "synced" not in st.session_state:
         st.session_state.indexed_files = []
 
 # --- Actions ---
+def check_connection():
+    try:
+        resp = requests.get(f"{st.session_state.api_url}/health", timeout=1)
+        return "LINKED" if resp.status_code == 200 else "OFFLINE"
+    except:
+        return "DISCONNECTED"
 def clean_answer(text):
     text = re.sub(r'\[[^\]]*\]', '', text)
     text = re.sub(r'\(Source:[^)]*\)', '', text)
@@ -182,52 +188,72 @@ def clean_answer(text):
     return text.strip()
 
 # --- Sidebar ---
+# --- Sidebar ---
 with st.sidebar:
     st.markdown('<div style="font-size: 1.4rem; font-weight:700; color:#000000; margin-bottom:1.5rem; letter-spacing:-1px;">ARCHIVES</div>', unsafe_allow_html=True)
     
     # Industrial Status Panel
+    conn_status = check_connection()
     st.markdown(f'''
     <div class="status-panel">
         <div class="status-item"><span>CORE STATUS</span> <span style="font-weight:700;">ACTIVE</span></div>
-        <div class="status-item"><span>CONNECTION</span> <span style="font-weight:700;">LINKED</span></div>
+        <div class="status-item"><span>CONNECTION</span> <span style="font-weight:700; color:{'#000' if conn_status == 'LINKED' else '#ff4b4b'};">{conn_status}</span></div>
         <div class="status-item"><span>DOCUMENTS</span> <span style="font-weight:700;">{len(st.session_state.indexed_files)}</span></div>
         <div style="height:10px;"></div>
         <div style="display:flex; justify-content:center; color:#ccc;">{ICON_WAV}</div>
     </div>
     ''', unsafe_allow_html=True)
     
-    if not st.session_state.indexed_files:
-        files = st.file_uploader("Upload", type=["pdf"], accept_multiple_files=True, label_visibility="collapsed")
-        if files:
-            if st.button("UPLOAD", use_container_width=True):
-                with st.spinner("Processing..."):
-                    for f in files:
-                        try:
-                            resp = requests.post(f"{st.session_state.api_url}/admin/upload", files={"file": (f.name, f)})
-                            if resp.status_code == 200 and f.name not in st.session_state.indexed_files:
+    # Persistent Uploader Section
+    st.markdown('<div style="font-size:0.75rem; font-weight:700; color:#888; margin-bottom:8px;">INGEST NEW DATA</div>', unsafe_allow_html=True)
+    files = st.file_uploader("Upload", type=["pdf"], accept_multiple_files=True, label_visibility="collapsed")
+    if files:
+        if st.button("UPLOAD", use_container_width=True):
+            with st.spinner("Processing..."):
+                for f in files:
+                    try:
+                        resp = requests.post(f"{st.session_state.api_url}/admin/upload", files={"file": (f.name, f)})
+                        if resp.status_code == 200:
+                            if f.name not in st.session_state.indexed_files:
                                 st.session_state.indexed_files.append(f.name)
-                        except: pass
-                    st.rerun()
-    else:
+                        else:
+                            st.error(f"Failed to upload {f.name}")
+                    except Exception as e:
+                        st.error(f"Error connecting to backend: {str(e)}")
+                st.rerun()
+
+    st.markdown('<div style="height:1.5rem; border-bottom:1px solid #eee; margin-bottom:1.5rem;"></div>', unsafe_allow_html=True)
+    
+    # List View Section
+    if st.session_state.indexed_files:
+        st.markdown('<div style="font-size:0.75rem; font-weight:700; color:#888; margin-bottom:12px;">ACTIVE MEMORY</div>', unsafe_allow_html=True)
         for i, fname in enumerate(st.session_state.indexed_files):
             col1, col2 = st.columns([5, 1])
             with col1:
                 st.markdown(f'<div class="file-card-box">{ICON_FILE} <span style="font-size:0.8rem; font-weight:600;">{fname}</span></div>', unsafe_allow_html=True)
             with col2:
-                if st.button("×", key=f"del_{i}"):
+                if st.button("×", key=f"del_{fname}_{i}"): # More unique key
                     try:
-                        requests.delete(f"{st.session_state.api_url}/admin/files/{fname}")
-                        st.session_state.indexed_files.pop(i)
-                    except: pass
-                    st.rerun()
+                        resp = requests.delete(f"{st.session_state.api_url}/admin/files/{fname}")
+                        if resp.status_code == 200:
+                            st.session_state.indexed_files.pop(i)
+                            st.rerun()
+                        else:
+                            st.error(f"Failed to delete {fname}")
+                    except Exception as e:
+                        st.error(f"Error: {e}")
         
-        st.markdown('<div style="height:2rem;"></div>', unsafe_allow_html=True)
+        st.markdown('<div style="height:1.5rem;"></div>', unsafe_allow_html=True)
         if st.button("CLEAR ALL", use_container_width=True):
             try:
-                requests.delete(f"{st.session_state.api_url}/admin/files")
-                st.session_state.indexed_files = []
-            except: pass
-            st.rerun()
+                resp = requests.delete(f"{st.session_state.api_url}/admin/files")
+                if resp.status_code == 200:
+                    st.session_state.indexed_files = []
+                    st.rerun()
+                else:
+                    st.error("Failed to clear archives")
+            except Exception as e:
+                st.error(f"Clear failed: {e}")
 
 # --- Main App ---
 st.markdown('''
