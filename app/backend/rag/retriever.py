@@ -22,13 +22,20 @@ class Retriever:
         )
 
     def retrieve(self, query: str, k: int = settings.VECTOR_DB_K) -> List[Tuple[Document, float]]:
-        """Retrieves top-k documents with a fresh DB connection."""
-        db = self._get_db()
-        if not db:
-            return []
-            
-        try:
-            return db.similarity_search_with_score(query, k=k)
-        except Exception as e:
-            # Handle cases where DB is specifically locked or corrupted during re-indexing
-            return []
+        """Retrieves top-k documents with a fresh DB connection and retry logic."""
+        for attempt in range(3):
+            db = self._get_db()
+            if not db:
+                time.sleep(1)  # Wait for index to be created
+                continue
+                
+            try:
+                # Standard retrieval
+                return db.similarity_search_with_score(query, k=k)
+            except Exception as e:
+                # Handle cases where DB is specifically locked or corrupted during re-indexing
+                logger.warning(f"Retrieval attempt {attempt+1} failed: {e}")
+                time.sleep(2)  # Wait for ingestion to finish
+                
+        logger.error("All retrieval attempts failed.")
+        return []
